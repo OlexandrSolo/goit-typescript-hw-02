@@ -28,8 +28,8 @@ function App() {
         setLoading(true);
         setError(false);
         const newImages = await fetchImagesWithTopic(value, page);
-        setImages((prevState) => [...prevState, ...newImages.results]);
-        setTotalPage(newImages.totalPage);
+        setImages((prevState) => [...prevState, ...newImages.data.results]);
+        setTotalPage(newImages.data.total_pages);
         setShowBtn(totalPage && totalPage !== page);
       } catch (error) {
         setError(true);
