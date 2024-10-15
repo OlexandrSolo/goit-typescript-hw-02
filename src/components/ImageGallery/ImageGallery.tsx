@@ -2,8 +2,7 @@ import ImageCard from "../ImageCard/ImageCard";
 import styles from "../ImageGallery/ImageGallery.module.css";
 
 export default function ImageGallery({ images, onClick }) {
-  const handleClick = (src, alt, isOpen) => {
-    // onClick({ src, alt, isOpen });
+  const handleClick = (src, alt) => {
     onClick({ alt, src });
   };
 
