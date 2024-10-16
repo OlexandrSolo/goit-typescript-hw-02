@@ -1,15 +1,28 @@
 import styles from "./ImageCard.module.css";
+import { Image } from "../App/App.types";
+import { FC } from "react";
 
-export default function ImageCard({ src, alt, contain }) {
-  return (
-    <>
-      <div
-        className={
-          contain ? styles.container + " " + styles.contain : styles.container
-        }
-      >
-        <img src={src} alt={alt} />
-      </div>
-    </>
-  );
+interface ImageCardProps {
+  imgData: Image;
+  onOpenModal: () => void;
+  dataForModal: (dataForModal: Image) => void;
 }
+
+export const ImageCard: FC<ImageCardProps> = ({ imgData, onOpenModal, dataForModal }) => {
+  const openModal = (imgData: Image) => {
+    dataForModal(imgData);
+    onOpenModal()
+  }
+  return (
+    <div
+      className={styles.container}
+    >
+      <img src={imgData.urls.small}
+        alt={imgData.alt_description !== null ? imgData.alt_description : "There is no description"
+
+        }
+        onClick={() => openModal(imgData)}
+      />
+    </div>
+  );
+};

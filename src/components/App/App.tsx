@@ -2,68 +2,68 @@ import { useEffect, useState } from "react";
 import styles from "./App.module.css";
 import fetchImagesWithTopic from "../Service/images-api";
 import Header from "../Header/Header";
-import ImageGallery from "../ImageGallery/ImageGallery";
-import ImageModal from "../ImageModal/ImageModal";
+import { ImageGallery } from "../ImageGallery/ImageGallery";
+import {ImageModal} from "../ImageModal/ImageModal";
 import Loading from "../Loading/Loading";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import LoadMoreBtn from "../LoadMoreBtn/LoadMoreBtn";
+import { Image, ModalImage, ResponseType } from "./App.types";
+import toast from "react-hot-toast";
 
-interface Image {
-  alt_description: string;
+const initialStateForModal = {
+  id: "",
+  alt_description: "",
   urls: {
-    regular: string;
-    small: string;
-  }
-}
-
-interface ModalImage{
-  src: string;
-  alt: string
+    regular: "",
+    small: "",
+  },
 }
 
 function App() {
-  const [value, setValue] = useState<string>("");
+  const [imgForSearch, setImgForSearch] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [images, setImages] = useState<Image[]>([]);
   const [error, setError] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [showBtn, setShowBtn] = useState<boolean>(false);
-  const [totalPage, setTotalPage] = useState<number>(999);
   const [modalIsOpen, setIsOpen] = useState<boolean>(false);
-  const [modalImg, setModalImg] = useState<ModalImage>({ src: "", alt: "" });
+  const [modalImg, setModalImg] = useState<Image>(initialStateForModal)
 
   useEffect(() => {
-    if (value.trim() === "") {
+    if (imgForSearch.trim() === "") {
       return;
     }
-    async function getImages() {
+    async function getImages(imgForSearch: string, page: number) {
       try {
         setLoading(true);
         setError(false);
-        const newImages: Image = await fetchImagesWithTopic(value, page);
-        setImages((prevState) => [...prevState, ...newImages.data.results]);
-        setTotalPage(newImages.data.total_pages);
-        setShowBtn(totalPage && totalPage !== page);
+        const newImages = await fetchImagesWithTopic<ResponseType>(imgForSearch, page);
+        if (newImages.total_pages === 0) {
+          toast.error("There is not photos matched your search. Try input another one, please")
+        }
+        setImages((prevState) => [...prevState, ...newImages.results]);
       } catch (error) {
         setError(true);
       } finally {
         setLoading(false);
       }
     }
-    getImages();
-  }, [value, page]);
+    getImages(imgForSearch, page);
+  }, [imgForSearch, page]);
 
-  const handleSubmit = (value:string) => {
+
+
+  const searchImg = (img: string) => setImgForSearch(img)
+  const dataModal = (modalImg: Image) => setModalImg(modalImg);
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => setIsOpen(false);
+
+  const handleSubmit = (img: string) => {
     setImages([]);
-    setValue(value);
-  };
-  const handleLoadMore = () => {
-    setPage(page + 1);
+    searchImg(img);
   };
 
-  const handleClickImg = ({ src, alt }) => {
-    setModalImg({ alt: alt, src: src });
-    setIsOpen(true);
+  const handleLoadMore = async () => {
+    setPage(page + 1);
   };
 
   return (
@@ -73,18 +73,16 @@ function App() {
         {loading && <Loading />}
         {error && <ErrorMessage />}
         {images.length > 0 && (
-          <ImageGallery images={images} onClick={handleClickImg} />
+          <ImageGallery images={images} openModal={openModal} dataForModal={dataModal} />
         )}
-        {images.length > 0 && !loading && showBtn && (
+        {images.length > 0 && !loading && (
           <LoadMoreBtn handleLoad={handleLoadMore} />
         )}
-
-        <ImageModal
-          src={modalImg.src}
-          alt={modalImg.alt}
-          isOpen={modalIsOpen}
-          onClose={setIsOpen}
-        />
+        {modalIsOpen && <ImageModal
+          dataForModal={modalImg}
+          modalIsOpen={modalIsOpen}
+          onCloseModal={closeModal}
+        />}
       </div>
     </>
   );

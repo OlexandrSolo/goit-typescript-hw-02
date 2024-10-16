@@ -1,20 +1,20 @@
-import ImageCard from "../ImageCard/ImageCard";
+import {ImageCard} from "../ImageCard/ImageCard";
 import styles from "../ImageGallery/ImageGallery.module.css";
+import { Image } from "../App/App.types";
+import {FC} from "react";
 
-export default function ImageGallery({ images, onClick }) {
-  const handleClick = (src, alt) => {
-    onClick({ alt, src });
-  };
+interface ImageGalleryProps{
+  images: Image[];
+  openModal: () => void;
+  dataForModal: (dataForModal: Image) => void;
+}
 
+export const ImageGallery: FC<ImageGalleryProps>=({ images, openModal, dataForModal }) => {
   return (
     <ul className={styles.parent}>
       {images.map((image) => (
-        <li
-          onClick={() => handleClick(image.urls.regular, image.alt_description)}
-          className="itemGallery"
-          key={image.id}
-        >
-          <ImageCard src={image.urls.small} alt={image.alt_description} />
+        <li key={image.id}>
+          <ImageCard imgData={image} onOpenModal={openModal} dataForModal={dataForModal} />
         </li>
       ))}
     </ul>

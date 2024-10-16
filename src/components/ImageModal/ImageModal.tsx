@@ -1,30 +1,36 @@
-import ItemGallery from "../ImageCard/ImageCard";
+import React from "react";
+import { Image } from "../App/App.types";
 import styles from "./ImageModal.module.css";
 import Modal from "react-modal";
+Modal.setAppElement("#root");
 
-export default function ImageModal({ src, alt, isOpen, onClose }) {
-  function closeModal() {
-    onClose(false);
-  }
+interface ImageModalProps {
+  dataForModal: Image;
+  onCloseModal: () => void;
+  modalIsOpen: boolean;
+}
 
+export const ImageModal: React.FC<ImageModalProps> = ({ dataForModal, onCloseModal, modalIsOpen }) => {
   return (
-    <Modal
-      aria={{ labelledby: "photo", describedby: alt }}
-      style={{
-        overlay: {
-          background: "rgba(0, 0, 0, 0.7)",
-        },
-      }}
-      contentLabel={alt}
-      isOpen={isOpen}
-      shouldCloseOnOverlayClick={true}
-      shouldCloseOnEsc={true}
-      onRequestClose={closeModal}
-      ariaHideApp={false}
-    >
-      <div className={styles.container}>
-        <img src={src} alt={alt} />
-      </div>
-    </Modal>
+    <>
+      <Modal
+        className={styles.modal}
+        overlayClassName={styles.overlay}
+        isOpen={modalIsOpen}
+        aria={{
+          labelledby: "photo",
+          describedby: dataForModal.alt_description !== null ? dataForModal.alt_description : "There is no description"
+        }}
+        shouldCloseOnOverlayClick={true}
+        shouldCloseOnEsc={true}
+        onRequestClose={onCloseModal}
+        ariaHideApp={false}
+      >
+
+        <img className={styles.contain} src={dataForModal.urls.regular}
+          alt={dataForModal.alt_description !== null ? dataForModal.alt_description : "There is no description"} />
+      </Modal>
+    </>
+
   );
 }
